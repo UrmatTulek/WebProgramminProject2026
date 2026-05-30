@@ -354,7 +354,7 @@ a {
 }
 .fav-toggle-btn.is-favorited .icon-filled{
   display: inline-block;
-  color: (var(--color-accent));
+  color: var(--color-accent);
 }
 
 .song-info {
@@ -634,14 +634,14 @@ a {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: rgb(24, 24, 27);
-    border: 1px solid rgb(49, 48, 53);
+    background-color: var(--color-background-primary);
+    border: 1px solid var(--color-border);
     padding: 10px 16px;
     border-radius: 5px;
     transition: background-color 0.2s ease, transform 0.2s ease;
 }
 .admin-song-card:hover{
-    background-color: rgb(29, 29, 32);
+    background-color: var(--color-background-secondary);
     transform: translateX(2px);
 }
 .admin-card-info{
@@ -653,14 +653,14 @@ a {
 .admin-card-title{
     font-weight: 600;
     font-size: 0.95rem;
-    color: white;
+    color: var(--color-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 .admin-card-artist{
     font-size: 0.8rem;
-    color: rgb(160, 165, 175);
+    color: var(--color-background-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -679,28 +679,28 @@ a {
     align-items: center;
     gap: 6px;
     transition: all 0.2s ease;
-    background-color: rgb(24, 24, 27);
+    background-color: var(--color-background-primary);
 }
 .admin-action-btn.delete-btn{
-    color:rgb(180, 188, 208);
+    color: var(--color-text-primary);
 }
 .admin-action-btn.delete-btn:hover{
     color: rgb(255, 77, 77);
 }
 .admin-action-btn.rename-btn{
-    color: rgb(180, 188, 208);
+    color: var(--color-text-primary);
 }
 .admin-action-btn.rename-btn:hover{
-    color: grey;
+    color: var(--color-text-secondary);
 }
-.admin-action.save-btn{
-    color: rgb(180, 188, 208);
+.admin-action-btn.save-btn{
+    color: var(--color-text-primary);
 }
 .admin-action-btn.save-btn:hover{
-    color: rgb(85, 214, 121);
+    color: var(--color-accent);
 }
 .admin-action-btn.cancel-btn{
-    color: rgb(180, 188, 208);
+    color: var(--color-text-primary);
 }
 .admin-action-btn.cancel-btn:hover{
     color: rgb(255, 74, 90);

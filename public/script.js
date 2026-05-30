@@ -99,7 +99,11 @@ $(document).ready(function() {
         const seacrhPrompt = $(this).val().trim();
         clearTimeout(searchTimeOut);
         if(seacrhPrompt === ''){
-            fetchFavorites();
+            if(currentUser.role === 'guest'){
+                fetchAllSongs();
+            }else{
+                fetchFavorites();
+            }
             return;
         };
 
