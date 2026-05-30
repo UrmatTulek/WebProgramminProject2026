@@ -1,0 +1,184 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body{
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgb(24, 24, 27);;
+            margin: 0;
+        }
+        .login-card{
+            background-color: rgb(34, 35, 38);
+            padding: 3rem;
+            border-radius: 2rem;
+            border: 1px solid rgb(49, 48, 53);
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        .auth-header i {
+            font-size: 3rem;
+            color: rgb(85, 214, 121);
+            margin-bottom: 1rem;
+        }
+        .auth-header h2 {
+            color: rgb(255, 255, 255);
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+        .auth-header p {
+            color: rgb(180, 188, 208);
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+            margin-bottom: 2.5rem;
+        }
+        .input-group{
+            position: relative;
+            margin-bottom: 1.25rem;
+        }
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgb(180, 188, 208);
+            opacity: 0.5;
+        }
+        .input-group input{
+            width: 100%;
+            background: rgb(24, 24, 27);
+            border: 1px solid rgb(49, 48, 53);
+            padding: 15px 15px 15px 45px;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease; 
+        }
+        .input-group input:focus{
+            outline: none;
+            border-color: rgb(85, 214, 121);
+            box-shadow: 0 0 0 4px rgba(85, 214, 121, 0.1);
+        }
+        .auth-btn{
+            width: 100%;
+            background-color: rgb(85, 214, 121);
+            color: rgb(24, 24, 27);
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            margin-top: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.2s filter 0.2s;
+        }
+        .auth-btn:hover{
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+        .auth-footer{
+            margin-top: 2rem;
+            font-size: 0.9rem;
+        }
+        .auth-footer a{
+            color: rgb(85, 214, 121);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+        .auth-footer a:hover{
+            text-decoration: underline;
+        }
+        .auth-btn.btn-secondary{
+            background: transparent;
+            border: 1px solid rgb(49, 48, 53);
+            color: rgb(180, 188, 208);
+            margin-top: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .auth-btn.btn-secondary:hover{
+            border-color: rgb(85, 214, 121);
+            color: rgb(24, 24, 27);
+            background: hsl(137, 61%, 45%);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="auth-header">
+            <i class="ph ph-music-note"></i>
+            <h2>Welcome Back</h2>
+            <p>Login to your acount</p>
+        </div>
+        <form id="loginForm" autocomplete="off">
+            <div class="input-group">
+                <i class="ph ph-user"></i>
+                <input type="text" id="username" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <i class="ph ph-lock"></i>
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="auth-btn">
+                <span>Log In</span>
+                <i class="ph ph-arrow-right"></i>
+            </button>
+            <button type="button" id="guestBtn" class="auth-btn btn-secondary">
+                <i class="ph ph-clock-user"></i>
+                <span>Continue as Guest</span>
+            </button>
+        </form>
+        <div class="auth-footer">
+            <div class="link">
+                <a href="/register.html">Create an account</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById("loginForm").addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try{
+                const response = await fetch('/api/login',{
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
+                });
+                const data = await response.json();
+                if(response.ok){
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/index.html'
+                }else{
+                    alert('Error: ' + data.message)
+                }
+            }catch(error){
+                console.error("Login failed!", error);
+                alert('Server failed!')
+            };
+        });
+
+        document.getElementById('guestBtn').addEventListener('click',() => {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+
+            window.location.href = '/index.html';
+        });
+    </script>
+</body>
+</html>

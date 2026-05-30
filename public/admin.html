@@ -1,0 +1,248 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin page | Add or Delete </title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+    <div>
+        <header class="header">
+            <div id="app-logo">
+                <h2>Admin page</h2>
+            </div>
+            <div class="header-controls">
+                <button id="goUserBtn" class="header-btn">Exit Admin</button>
+            </div>                
+        </header>
+        <main class="main-content">
+            <div id="admin-panel" class="admin-card">
+                <h3>Upload new track</h3>
+                <form id="uploadForm">
+                        <input type="text" id="upload-title" placeholder="Title" required autocomplete="off">
+                        <input type="text" id="upload-artist" placeholder="Artist" required autocomplete="off">
+                    <div class="file-input-wrapper">
+                        <label for="song-file" class="file-input-label">
+                            <i class="ph ph-cloud-arrow-up"></i>
+                            <span id="file-name-display">Select a file</span>
+                        </label>
+                        <input type="file" id="song-file" accept="audio/mpeg" required>
+                    </div>
+                    <button type="submit" id="uploadBtn">Upload</button>
+                </form>
+                <div id="upload-status"></div>
+            </div>
+            <div class="search-container">
+                <input type="text" id="searchBar" placeholder="Type to search">
+            </div>
+            <section class="library-section">
+                <h3>Library of songs</h3>
+                <div id="adminSongsList" class="song-grid"></div>
+            </section>
+        </main>
+    </div>
+    <script>
+        let allSongs = [];
+
+        function sanitize(str){
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML; 
+        }
+
+        $('#song-file').on('change', function(){
+            const fileName = this.files[0]?.name || "Select a file";
+            $('#file-name-display').text(fileName);
+        });
+
+        $('#uploadForm').on('submit', function(e){
+            e.preventDefault();
+
+            let formData = new FormData();
+            formData.append('title', $('#upload-title').val());
+            formData.append('artist', $('#upload-artist').val());
+            formData.append('file', $('#song-file')[0].files[0]);
+            formData.append('requestingUser', localStorage.getItem('user'));
+
+            $('#upload-status').text('Uploading...').show();
+
+            $.ajax({
+                url: '/api/upload',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(res){
+                    $('#upload-status').text('Upload is succesful!');
+                    $('#uploadForm')[0].reset();
+                    setTimeout(() => {
+                        $('#upload-status').fadeOut();
+                        $('#file-name-display').text('Select a file').css('color', 'inherit');
+                    }, 2000)
+                },
+                error: function(xhr){
+                    $('#upload-status').text('Failed to upload' + xhr.responseText);
+                }   
+            });
+        });
+
+        function displaySongsForAdmin(songs){
+            const $container = $('#adminSongsList');
+
+            if(songs.length === 0){
+                $container.html('<p class="empty-msg">No songs found in the database.</div>');
+                return;
+            }
+
+            const htmlContent = songs.map(song => {
+                return `
+                    <div class="admin-song-card" data-song-id="${sanitize(String(song.id))}">
+                        <div class="admin-card-info">
+                            <span class="admin-card-title">${sanitize(song.title)}</span>
+                            <span class="admin-card-artist">${sanitize(song.artist)}</span>
+                        </div>
+                        <div class="admin-card-controls">
+                            <button class="admin-action-btn save-btn" style="visibility:hidden;">
+                                <i class="ph ph-check-circle"></i>
+                            </button>
+                            <button class="admin-action-btn cancel-btn" style="visibility:hidden;">
+                                <i class="ph ph-x-circle"></i>
+                            </button>
+                            <button class="admin-action-btn delete-btn" style="visibility:hidden;">
+                                <i class="ph ph-trash"></i>
+                            </button>
+                            <button class="admin-action-btn rename-btn">
+                                <i class="ph ph-pencil-simple"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            $container.html(htmlContent);
+        };
+
+        async function fetchSongs(){
+            try{
+                const response = await fetch('/api/songs');
+                if(!response.ok) throw new Error("Failed to reach endpoint");
+
+                allSongs = await response.json();
+                displaySongsForAdmin(allSongs);
+            }catch(err){
+                console.error(err);
+                $('#adminSongsList').html('<p class="empty-msg">Failed to load Data!</p>');
+            }
+        };
+
+        $('#searchBar').on('input', function(){
+            const queryText = $(this).val().toLowerCase().trim();
+
+            const filteredSongs = allSongs.filter(song => {
+                return song.title.toLowerCase().includes(queryText) ||
+                       song.artist.toLowerCase().includes(queryText);
+            });
+
+            displaySongsForAdmin(filteredSongs);
+        });
+
+        $('document').ready(function(){
+            fetchSongs();
+        });
+
+        $('#adminSongsList').on('click', '.rename-btn', function(){
+            const $card = $(this).closest('.admin-song-card');
+            const $titleSpan = $card.find('.admin-card-title');
+            const $artistSpan = $card.find('.admin-card-artist');
+
+            const currentTitle = $titleSpan.text().trim();
+            const currentArtist = $artistSpan.text().trim();
+
+            $titleSpan.html(`<input type="text" class="admin-inline-input title-input" value="${currentTitle}">`);
+            $artistSpan.html(`<input type="text" class="admin-inline-input artist-input" value="${currentArtist}">`);
+
+            $card.find('.rename-btn').hide().css('visibility', 'hidden');
+            $card.find('.save-btn, .cancel-btn, .delete-btn').show().css('visibility', 'visible');
+        });
+
+        $('#adminSongsList').on('click', '.cancel-btn', function(){
+            displaySongsForAdmin(allSongs);
+        });
+
+        $('#adminSongsList').on('click', '.save-btn', function(){
+            const $card = $(this).closest('.admin-song-card');
+            const songId = $card.attr('data-song-id');
+            const newTitle = $card.find('.title-input').val().trim();
+            const newArtist = $card.find('.artist-input').val().trim();
+
+            if(!newTitle || !newArtist){
+                alert("Song title or artist can not be empty");
+                return;
+            }
+
+            const $saveBtn = $(this);
+            $saveBtn.prop('disabled', true);
+
+            $.ajax({
+                url: `/api/songs/${songId}`,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify({title: newTitle, artist: newArtist, requestingUser: JSON.parse(localStorage.getItem('user'))}),
+                success: function(res){
+                    const songIndex = allSongs.findIndex(s => s.id == songId);
+                    if(songIndex !== -1){
+                        allSongs[songIndex].title = newTitle;
+                        allSongs[songIndex].artist = newArtist;
+                    }
+                    displaySongsForAdmin(allSongs);
+                },
+                error: function(xhr){
+                    alert("Failed to update song details:" + (xhr.responseJSON?.message || xhr.responseText));
+                    displaySongsForAdmin(allSongs);
+                }
+            });
+        });
+
+        $('#adminSongsList').on('click', '.delete-btn', function(){
+            const $card = $(this).closest('.admin-song-card');
+            const songId = $card.attr('data-song-id');
+            let songTitle = $card.find('.title-input').val();
+            if(!songTitle){
+                songTitle = $card.find('.admin-card-title').text().trim();
+            }
+
+            if(!confirm(`Do you want to delete ${songTitle} from the server?`)){
+                return;
+            }
+
+            const $deleteBtn = $(this);
+            $deleteBtn.prop('disabled', true);
+
+            $.ajax({
+                url: `/api/songs/${songId}`,
+                type: 'DELETE',
+                data: JSON.stringify({requestingUser: JSON.parse(localStorage.getItem('user'))}),
+                success: function(res){
+                    allSongs = allSongs.filter(s => s.id !== songId);
+                    $card.fadeOut(400, function(){
+                        if(allSongs.length === 0){
+                            displaySongsForAdmin(allSongs);
+                        }else{
+                            $(this).remove();
+                        }
+                    })
+                },
+                error: function(xhr){
+                    $deleteBtn.prop('disabled', false);
+                    alert('System failed to delete the item: ' + (xhr.responseJSON?.message || xhr.responseText));
+                }
+            });
+        });
+
+        $('#goUserBtn').on('click', function(){
+            window.location.href = '/index.html';
+        });
+    </script>
+</body>
+</html>
