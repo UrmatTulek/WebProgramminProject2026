@@ -706,9 +706,9 @@ a {
     color: rgb(255, 74, 90);
 }      
 .admin-inline-input {
-    background: rgb(18, 18, 20);
-    border: 1px solid rgb(85, 214, 121);
-    color: white;
+    background: var(--color-background-primary);
+    border: 1px solid var(--color-accent);
+    color: var(--color-text-primary);
     border-radius: 4px;
     padding: 2px 6px;
     font-family: inherit;
