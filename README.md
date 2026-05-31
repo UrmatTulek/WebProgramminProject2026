@@ -8,7 +8,7 @@ A music streaming application (simillar to a Spotify) built with Node.js, Expres
 
 -Player with skip, shuffle and repeat playlist buttons (styling for buttons and animation features were taken from https://codepen.io/havardob/pen/MWqMmgb)
 
--User registration and login with bcrpt password hashing
+-User registration and login with bcrypt password hashing
 
 -Song search
 
