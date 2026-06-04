@@ -237,7 +237,7 @@ app.delete('/api/songs/:id', requireAdmin, async (req, res) => {
 
         const fileName = songs[0].file_path;
         await db.query('DELETE FROM songs WHERE id = ?', [songId]);
-        const absolutePath = path.join(process.cwd(), 'music', fileName);
+        const absolutePath = path.join(__dirname, 'music', fileName);
         
         fs.unlink(absolutePath, (err) => {
             if(err){
