@@ -21,9 +21,10 @@ $(document).ready(function() {
             username: 'Guest',
             role: 'guest'
         }
+        fetchAllSongs();
     }else{
         currentUser = JSON.parse(savedUser);
-        fetchAllSongs();
+        fetchFavorites();
     }
     if(currentUser.role === 'admin'){
         $('#goAdminBtn').css('visibility', 'visible');
@@ -245,7 +246,7 @@ function displayMusicCards(songs, isSearchResults = false){
                     <i class="ph ph-heart icon-outline"></i>
                     <i class="ph-fill ph-heart icon-filled"></i>
                 </button>
-                <button class="button button--play playBtn track-play-btn" onclick="playTrack(${index})">
+                <button class="button button--play playBtn track-play-btn">
                     <i class="ph ph-play"></i>
                     <i class="ph ph-pause"></i>
                 </button>
@@ -337,11 +338,12 @@ function playTrack(index){
         }
     }
 
-    audioPlayer.src = `music/${track.file_path}`;
+    audioPlayer.src = `/music/${track.file_path}`;
+    console.log(audioPlayer.src);
     titleDisplay.text(track.title);
     artistDisplay.text(track.artist);
 
-    audioPlayer.load()
+    audioPlayer.load();
     audioPlayer.play().catch(error => {
         console.error("Player failed. Check if file exists at: ", audioPlayer.src);
     });

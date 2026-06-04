@@ -15,7 +15,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(express.json());
 app.use(cors());
 app.use(express.static('public'));
-app.use('/music', express.static('music'));
+app.use('/music', express.static(path.join(__dirname, 'music')));
 
 function requireAdmin(req, res, next){
     const user = req.body.requestingUser || req.query.requestingUser;
@@ -29,6 +29,7 @@ function requireAdmin(req, res, next){
         return res.status(500).json({message: 'Invalid data'})
     }
 }
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null,'music/');
